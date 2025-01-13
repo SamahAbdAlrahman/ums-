@@ -5,13 +5,13 @@ import bcrypt from 'bcrypt';
 const router = Router();
 // CURD
 
-// Create
+// register
 router.post('/users', async (req, res) => {
-    const { name, email, password, age } = req.body;
+    const { name, email, password } = req.body;
     try {
       const hashPassword = bcrypt.hashSync(password, 8);
   
-      const newUser = await UserModel.create({ name, email, password: hashPassword, age });
+      const newUser = await UserModel.create({ name, email, password: hashPassword });
   
       res.status(201).json(newUser);
     } catch (error) {

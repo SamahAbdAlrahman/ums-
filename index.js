@@ -3,7 +3,7 @@ import cors from "cors";
 
 import express from "express";
 import {ConnectionDB} from "./DB/connection.js";
-import userRouter from "./src/modules/user/user.js";  
+import userRouter from "./src/modules/user/user.router.js";  
 
 const app = express();
 app.use(express.json());
