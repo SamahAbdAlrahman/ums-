@@ -30,6 +30,13 @@ const UserModel = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
     },
+    role: {
+      type: DataTypes.ENUM(
+      'user','admin'
+      ),
+      defaultValue: 'user', 
+      allowNull: false,
+      },
 }, {
   timestamps: false, // لتعطيل الحقول الافتراضية createdAt و updatedAt
 });

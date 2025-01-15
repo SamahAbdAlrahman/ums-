@@ -1,26 +1,16 @@
 import { Router } from "express";
 import { UserModel } from "../../../DB/models/users.js"; 
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
 
 const router = Router();
 // CURD
 
-// register
-router.post('/users', async (req, res) => {
-    const { name, email, password } = req.body;
-    try {
-      const hashPassword = bcrypt.hashSync(password, 8);
-        const newUser = await UserModel.create({ name, email, password: hashPassword });
-  
-      res.status(201).json(newUser);
-    } catch (error) {
-      console.error('Error creating user:', error);
-      res.status(500).json({ error: 'Failed to create user.' });
-    }
-  });
-  // Read(get)
-  router.get('/users', async (req, res) => {
+
+ 
+   // Read(get)
+
+   router.get('/users', async (req, res) => {
     try {
    const user = await UserModel.findAll();
   
@@ -30,34 +20,21 @@ router.post('/users', async (req, res) => {
       res.status(500).json({ error: 'Failed' });
     }
   });
-  // login
-  router.post('/login',async(req,res)=>{
+// GET NAMES 
+  router.get('/usersNames', async (req, res) => {
     try {
-
-    const {email,password} = req.body;
-    const user = await UserModel.findOne({
-    where:{email:email}
-    });
-    if(user == null){
-    return res.status(404).json({message:"invaid email"});
+   const user = await UserModel.findAll({
+    attributes :['name','email']
+   });
+  
+      res.status(200).json(user);
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Failed' });
     }
-    const check = await bcrypt.compareSync(password,user.password);
-    if(check == false){
-    return res.status(400).json({message:"invalid password"});
-    }
-
-    // jwt token
-    const token = jwt.sign({id:user.id,name:user.name},"secret_key")
-    return res.status(200).json({message:"success",token});
-  }
-  catch (error) {
-    console.error("Error during login:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-  });
-    
+  }); 
   // Update
-  router.put('/users/:id', async (req, res) => {
+  router.put('/updateUser/:id', async (req, res) => {
     try {
       const { name } = req.body;
       const { id } = req.params;
@@ -80,22 +57,35 @@ router.post('/users', async (req, res) => {
     }
   });
   // Delete
-  router.delete('/users/:id', async (req, res) => {
+  router.delete('/deleteUser/:id', async (req, res) => {
     try {
-      const { name } = req.body;
       const { id } = req.params;
-      const user = await UserModel.findByPk(id); 
-      if (user == null) {
-        return res.status(404).json({ error: 'User not found' }); 
+      const token = req.headers['token'];
+      
+      if (!token) {
+        return res.status(401).json({ message: "Token is missing" });
       }
-      await user.destroy(); 
-      // حذف المستخدم
+           
+      const decoded = jwt.verify(token, 'secret_key');
+      console.log("Decoded token:", decoded); //  محتويات التوكين
   
+      if (decoded.role !== 'admin') {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      const user = await UserModel.findOne({ where: { id } });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      await user.destroy(); 
       res.status(200).json(user);
+  
     } catch (error) {
       console.error('Error:', error);
-      res.status(500).json({ error: 'Failed to delete user' }); // في حال حدوث خطأ
+      res.status(500).json({ error: 'Failed to delete user' });
     }
   });
+  
 
   export default router;
