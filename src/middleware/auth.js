@@ -16,7 +16,8 @@ const auth=()=>{
       if (decoded.role !== 'admin') {
         return res.status(403).json({ message: "Unauthorized" });
       }
-      
+      req.id = decoded.id;
+      next();
 }
     }
 export default auth;

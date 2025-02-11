@@ -61,7 +61,7 @@ const router = Router();
       res.status(200).json(user);
     } catch (error) {
       console.error('Error:', error);
-      res.status(500).json({ error: 'Failed to update user' }); // في حال حدوث خطأ
+      res.status(500).json({ error: 'Failed to update user' }); 
     }
   });
   // Delete
